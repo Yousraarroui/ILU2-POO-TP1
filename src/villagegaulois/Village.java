@@ -8,10 +8,12 @@ public class Village {
 	private Chef chef;
 	private Gaulois[] villageois;
 	private int nbVillageois = 0;
+	private Marche marche;
 
-	public Village(String nom, int nbVillageoisMaximum) {
+	public Village(String nom, int nbVillageoisMaximum, int nbEtals) {
 		this.nom = nom;
 		villageois = new Gaulois[nbVillageoisMaximum];
+		marche = new Marche(nbEtals);
 	}
 
 	public String getNom() {
@@ -56,6 +58,49 @@ public class Village {
 		}
 		return chaine.toString();
 	}
+	// a) permet d'installer un vendeur Gaulois dans un étal libre du marché.
+		public String installerVendeur(Gaulois vendeur, String produit, int nbProduit){
+			int indiceEtalLibre = marche.trouverEtalLibre(); //rechercher un étal libre sur le marché
+			if (indiceEtalLibre != -1) {
+				marche.utiliserEtal(indiceEtalLibre, vendeur, produit, nbProduit);
+				return vendeur.getNom() + " vend des " + produit + " à l'étal n° " + indiceEtalLibre + ".";
+			}else {
+				return vendeur.getNom() + " ne peut pas trouver un etal libre pour vendre des " + produit + ".";
+				}
+			}
+		// b)permet de rechercher les vendeurs qui proposent un produit sur le marché.
+		public String rechercherVendeursProduit(String produit) {
+			Etal[] etals = marche.trouverEtals(produit); //rechercher tous les étals qui contiennent le produit spécifié
+			StringBuilder chaine = new StringBuilder("Les vendeurs qui proposent des " + produit + " sont :\n");
+			for (int i = 0; i < etals.length; i++) {
+				Etal etal = etals[i];
+				chaine.append("- " + etal.getVendeur().getNom() + "\n");
+			}
+			return chaine.toString();
+		}
+		// c)permet de rechercher l'étal associé à un vendeur 
+		//(Gaulois) donné en utilisant la classe interne Marche.
+		public Etal rechercherEtal(Gaulois vendeur) {
+			return marche.trouverVendeur(vendeur);
+		}
+		// d)gère le départ d'un vendeur du marché en libérant l'étal associé au vendeur
+		public String partirVendeur(Gaulois vendeur) throws EtalNonOccupeException {
+			Etal etal = marche.trouverVendeur(vendeur);//recherche l'étal associé à ce vendeur.
+			if (etal != null) {
+				String result = etal.libererEtal();
+				return result;
+			}
+			else {
+				return vendeur.getNom() + " n'a pas trouvé d'étal à quitter.";
+			}
+		}
+		// e)fait appel à la méthode afficherMarche de l'objet marche, 
+		//puis renvoie la chaîne de caractères résultante.
+		public String afficherMarche() {
+			//chaîne de caractères qui représente l'état actuel du marché, 
+			//avec des informations sur chaque étal et son occupant.
+			return marche.afficherMarche();
+		}
 	
 	public class Marche{
 		private Etal[] etals;
